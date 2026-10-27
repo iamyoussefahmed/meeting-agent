@@ -1,0 +1,8 @@
+.env
+.venv/
+data/
+__pycache__/
+attendee/
+attendee-build.log
+.claude/
+.DS_Store

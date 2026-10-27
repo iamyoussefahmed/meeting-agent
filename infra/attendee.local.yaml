@@ -1,0 +1,39 @@
+# Local overrides for Attendee's dev compose file.
+# Adds SeaweedFS as a free, local S3 replacement for recordings and audio chunks.
+# Usage (from the attendee/ folder):
+#   docker compose -f dev.docker-compose.yaml -f ../infra/attendee.local.yaml up -d
+
+services:
+  s3:
+    image: chrislusf/seaweedfs:4.45
+    # No IAM config means the S3 API accepts any credentials; it is only
+    # reachable on this Mac.
+    command: server -dir=/data -s3 -s3.port=8333
+    ports:
+      - "127.0.0.1:8333:8333"
+    volumes:
+      - s3data:/data
+    networks:
+      - attendee_network
+    restart: unless-stopped
+
+  # restart: unless-stopped brings the stack back whenever Docker Desktop starts.
+  attendee-app-local:
+    depends_on: [postgres, redis, s3]
+    restart: unless-stopped
+    environment:
+      - AWS_ENDPOINT_URL=http://s3:8333
+
+  attendee-worker-local:
+    depends_on: [postgres, redis, s3]
+    restart: unless-stopped
+    environment:
+      - AWS_ENDPOINT_URL=http://s3:8333
+
+  attendee-scheduler-local:
+    restart: unless-stopped
+    environment:
+      - AWS_ENDPOINT_URL=http://s3:8333
+
+volumes:
+  s3data:

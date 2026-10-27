@@ -1,0 +1,6 @@
+anthropic
+icalendar
+recurring-ical-events
+pydantic>=2
+python-dotenv
+requests
